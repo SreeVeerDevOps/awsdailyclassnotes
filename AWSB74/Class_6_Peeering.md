@@ -46,6 +46,37 @@ sudo cp /tmp/prometheus-3.4.0.linux-amd64/promtool /usr/local/bin/
 sudo chown prometheus:prometheus /usr/local/bin/prometheus
 sudo chown prometheus:prometheus /usr/local/bin/promtool
 ls -al /usr/local/bin/
+
+sudo nano /etc/systemd/system/prometheus.service
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+   --config.file=/etc/prometheus/prometheus.yml \
+   --storage.tsdb.path=/var/lib/prometheus/ \
+   --web.console.templates=/etc/prometheus/consoles \
+   --web.console.libraries=/etc/prometheus/console_libraries \
+   --web.enable-lifecycle \
+   --web.enable-admin-api \
+   --log.level=info
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl daemon-reload
+sudo systemctl start prometheus
+sudo systemctl enable prometheus
+sudo systemctl status prometheus --no-pager 
+
+If you want to restart prometheus service
+sudo systemctl daemon-reload
+sudo systemctl restart prometheus
 ```
 ## Prometheus Config File
 ```
@@ -70,6 +101,18 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
     - targets: ['172.22.1.100:9100','ec2-18-118-126-24.us-east-2.compute.amazonaws.com:9100']
+```
+
+## Restarting Prometheus
+```
+sudo systemctl daemon-reload
+sudo systemctl start prometheus
+sudo systemctl enable prometheus
+sudo systemctl status prometheus --no-pager 
+
+If you want to restart prometheus service
+sudo systemctl daemon-reload
+sudo systemctl restart prometheus
 ```
 
 
